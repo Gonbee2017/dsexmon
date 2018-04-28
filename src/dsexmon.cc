@@ -207,11 +207,11 @@ void Main_Window::load(const DWORD& procId) {
         process_handle = procHan;
         procHanExit_ = procHanExit;
         dsex_header_address = dsexHeadAdr;
-        Fl::add_timeout(0.0, sort, this);
+        Fl::add_timeout(0.0, update, this);
     } else fl_alert("プロセスメモリ内にダビスタEXが見つかりません。");
 }
 
-void Main_Window::sort(void* some) {
+void Main_Window::update(void* some) {
     static char label[256];
     Main_Window* win = (Main_Window*)(some);
     Racing_Horse_Table* tab = win->racHorTab_.get();
@@ -261,7 +261,7 @@ void Main_Window::sort(void* some) {
             tab->rows(tab->records.size());
             tab->redraw();
 
-            Fl::repeat_timeout(1.0, sort, win);
+            Fl::repeat_timeout(1.0, update, win);
         } catch (const std::runtime_error& err) {
             //fl_alert("予期せぬエラーが発生しました。\n%s", err.what());
             fl_alert(

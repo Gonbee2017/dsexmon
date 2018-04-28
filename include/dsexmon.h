@@ -142,7 +142,7 @@ private:
     std::shared_ptr<scope_exit> procHanExit_;
     static void procBut_callback(Fl_Widget* wid, void* some);
     static void racHorTab_callback(Fl_Widget* wid, void* some);
-    static void sort(void* some);
+    static void update(void* some);
 };
 
 class Racing_Horse_Table : public Sortable_Table<racing_horse_record> {
