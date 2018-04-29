@@ -102,14 +102,13 @@ const std::string NAME_LETTERS[128] = {
     "？", "？", "？", "？", "？", "？", "？", "？",
     "？", "？", "？", "？", "？", "？", "？", "？",
 };
-const std::string LOCATION_LABELS[3] = {"美浦", "栗東", "牧場", };
+const std::string LOCATION_LABELS[3] = {"美浦", "栗東", "牧場"};
 const std::string SEX_LABELS[3] = {"牡", "牝", "騙"};
 const std::string AGE_LABELS[9] =
     {"当", "２", "３", "４", "５", "６", "７", "８", "９"};
 const std::string COLOR_LABELS[8] =
     {"栗毛", "鹿毛", "黒鹿", "栃栗", "青鹿", "芦毛", "青毛", "白毛"};
 const std::string GROWTH_TYPE_LABELS[5] = {"早", "普", "晩", "？", "持"};
-char main_window_label[256];
 
 unsigned stallion_t::achievement() const {
     return (status >> 28) & 0x3;
@@ -394,7 +393,6 @@ void Process_Dialog::load() {
     }
     procTab_->sort();
     procTab_->rows(procTab_->records.size());
-    if (procTab_->records.empty()) okBut_->deactivate();
     procTab_->redraw();
 }
 

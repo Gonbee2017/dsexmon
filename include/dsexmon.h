@@ -223,7 +223,6 @@ extern const std::string SEX_LABELS[3];
 extern const std::string AGE_LABELS[9];
 extern const std::string COLOR_LABELS[8];
 extern const std::string GROWTH_TYPE_LABELS[5];
-extern char main_window_label[256];
 
 std::string Sprintf(const char* format, ...);
 std::string ansi_to_utf8(const std::string& ansi);
