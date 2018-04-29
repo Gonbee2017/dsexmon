@@ -12,6 +12,7 @@ dsexmon.exeを起動します。
 
 ゲーム内の競走馬の一覧が表示されます。  
 ![](img/README_dsexmon_loaded.png)  
+
 | 項目 | 説明 |
 | :---: | :--- |
 | 馬名 | 名前。 |
