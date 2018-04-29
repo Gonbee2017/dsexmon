@@ -287,50 +287,50 @@ void Sortable_Table<R>::self_callback(Fl_Widget* wid, void* some) {
 void Racing_Horse_Table::draw_cell
     (TableContext context, int R, int C, int X, int Y, int W, int H)
 {
-    using LAB = std::function<std::string(const racing_horse_record)>;
+    using LAB = std::function<std::string(const racing_horse_record&)>;
     static const LAB LABS[19] = {
-        [] (const racing_horse_record rec) -> std::string {
+        [] (const racing_horse_record& rec) -> std::string {
             return rec.name;
-        }, [] (const racing_horse_record rec) -> std::string {
+        }, [] (const racing_horse_record& rec) -> std::string {
             return LOCATION_LABELS[std::min(rec.index / 10, 2u)];
-        }, [] (const racing_horse_record rec) -> std::string {
+        }, [] (const racing_horse_record& rec) -> std::string {
             return SEX_LABELS[rec.horse.sex()];
-        }, [] (const racing_horse_record rec) -> std::string {
+        }, [] (const racing_horse_record& rec) -> std::string {
             std::string lab;
             if (rec.horse.age < 9) lab = AGE_LABELS[rec.horse.age];
             else lab = Sprintf("%d", rec.horse.age + 1);
             return lab;
-        }, [] (const racing_horse_record rec) -> std::string {
+        }, [] (const racing_horse_record& rec) -> std::string {
             return COLOR_LABELS[rec.horse.color()];
-        }, [] (const racing_horse_record rec) -> std::string {
+        }, [] (const racing_horse_record& rec) -> std::string {
             return Sprintf("%d+%d", rec.horse.max_speed,
                 rec.horse.late_bloomer_bonus());
-        }, [] (const racing_horse_record rec) -> std::string {
+        }, [] (const racing_horse_record& rec) -> std::string {
             return Sprintf("%d", rec.horse.speed);
-        }, [] (const racing_horse_record rec) -> std::string {
+        }, [] (const racing_horse_record& rec) -> std::string {
             return Sprintf("%d%+04d", rec.horse.max_stamina,
                 rec.horse.mare_complement(rec.father));
-        }, [] (const racing_horse_record rec) -> std::string {
+        }, [] (const racing_horse_record& rec) -> std::string {
             return Sprintf("%d", rec.horse.stamina);
-        }, [] (const racing_horse_record rec) -> std::string {
+        }, [] (const racing_horse_record& rec) -> std::string {
             return Sprintf("%d", rec.horse.max_guts);
-        }, [] (const racing_horse_record rec) -> std::string {
+        }, [] (const racing_horse_record& rec) -> std::string {
             return Sprintf("%d", rec.horse.guts);
-        }, [] (const racing_horse_record rec) -> std::string {
+        }, [] (const racing_horse_record& rec) -> std::string {
             return Sprintf("%d", rec.horse.max_temper);
-        }, [] (const racing_horse_record rec) -> std::string {
+        }, [] (const racing_horse_record& rec) -> std::string {
             return Sprintf("%d", rec.horse.temper);
-        }, [] (const racing_horse_record rec) -> std::string {
+        }, [] (const racing_horse_record& rec) -> std::string {
             return GROWTH_TYPE_LABELS[rec.horse.growth_type()];
-        }, [] (const racing_horse_record rec) -> std::string {
+        }, [] (const racing_horse_record& rec) -> std::string {
             return Sprintf("%02X", rec.horse.growth);
-        }, [] (const racing_horse_record rec) -> std::string {
+        }, [] (const racing_horse_record& rec) -> std::string {
             return Sprintf("%d", rec.horse.dart);
-        }, [] (const racing_horse_record rec) -> std::string {
+        }, [] (const racing_horse_record& rec) -> std::string {
             return Sprintf("%d", rec.horse.health);
-        }, [] (const racing_horse_record rec) -> std::string {
+        }, [] (const racing_horse_record& rec) -> std::string {
             return Sprintf("%+04d", rec.horse.weight * 2);
-        }, [] (const racing_horse_record rec) -> std::string {
+        }, [] (const racing_horse_record& rec) -> std::string {
             return Sprintf("%02X", rec.horse.condition);
         },
     };
