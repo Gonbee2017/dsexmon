@@ -44,7 +44,6 @@ struct farm_t {
 struct stallion_t {
     DWORD status;
     WORD pedigree[15];
-
     unsigned achievement() const;
     unsigned color() const;
     unsigned dart() const;
@@ -93,7 +92,6 @@ struct racing_horse {
         BYTE left_dart[4];
     } result;
     BYTE x_68_6[6];
-
     unsigned color() const;
     unsigned growth_type() const;
     unsigned late_bloomer_bonus() const;
@@ -119,11 +117,11 @@ public:
         const int& y,
         const int& wid,
         const int& hei,
-        compare_t* comps
+        const compare_t* comps
     );
     void sort();
 private:
-    compare_t* comps_;
+    const compare_t* comps_;
     int col_, ord_;
     static void self_callback(Fl_Widget* wid, void* some);
 };
@@ -142,7 +140,8 @@ private:
     std::shared_ptr<scope_exit> procHanExit_;
     static void procBut_callback(Fl_Widget* wid, void* some);
     static void racHorTab_callback(Fl_Widget* wid, void* some);
-    static void update(void* some);
+    static void timer_callback(void* some);
+    void update();
 };
 
 class Racing_Horse_Table : public Sortable_Table<racing_horse_record> {
@@ -166,7 +165,7 @@ protected:
     ) override;
 private:
     Main_Window* mainWin_;
-    static Sortable_Table<racing_horse_record>::compare_t comps_[19];
+    static const Sortable_Table<racing_horse_record>::compare_t comps_[19];
 };
 
 class Process_Dialog : public Fl_Window {
@@ -197,7 +196,7 @@ protected:
         int H = 0
     ) override;
 private:
-    static Sortable_Table<PROCESSENTRY32>::compare_t comps_[2];
+    static const Sortable_Table<PROCESSENTRY32>::compare_t comps_[2];
 };
 
 class scope_exit {
@@ -253,7 +252,7 @@ Sortable_Table<R>::Sortable_Table(
     const int& y,
     const int& wid,
     const int& hei,
-    compare_t* comps
+    const compare_t* comps
 ) : Fl_Table_Row(x, y, wid, hei), comps_(comps), col_(-1) {
     callback(self_callback, this);
 }
@@ -342,8 +341,9 @@ void Racing_Horse_Table::draw_cell
         fl_push_clip(X, Y, W, H);
         fl_draw_box(FL_THIN_UP_BOX, X, Y, W, H, col_header_color());
         fl_color(FL_BLACK);
-        fl_draw
-            (RHT_COL_HEADER_LABELS[C].c_str(), X, Y, W, H, FL_ALIGN_CENTER);
+        fl_draw(
+            RHT_COL_HEADER_LABELS[C].c_str(), X, Y, W, H, FL_ALIGN_CENTER
+        );
         fl_pop_clip();
         break;
     case CONTEXT_CELL:

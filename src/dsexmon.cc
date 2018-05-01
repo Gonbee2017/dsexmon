@@ -42,7 +42,7 @@ const int RHT_COL_WIDTH[19] = {
     30,
     40,
     25,
-    52,
+    54,
     25,
     25,
     25,
@@ -179,19 +179,20 @@ unsigned racing_horse::sex() const {
     return sex_color & 0x3;
 }
 
-Main_Window::Main_Window() : Fl_Double_Window(563, 242, APP_NAME.c_str()) {
+Main_Window::Main_Window() :
+    Fl_Double_Window(565, 242, APP_NAME.c_str()), process_handle(NULL)
+{
     procBut_ = std::make_shared<Fl_Button>
-        (0, 0, 563, 20, "ダビスタEXを実行しているプロセスを開く");
+        (0, 0, 565, 20, "ダビスタEXを実行しているプロセスを開く");
     procBut_->labelfont(FL_COURIER);
     procBut_->labelsize(11);
     procBut_->callback(procBut_callback, this);
-
     racHorTab_ = std::make_shared<Racing_Horse_Table>
-        (0, 20, 563, 222, this);
-
+        (0, 20, 565, 222, this);
     end();
     resizable(*racHorTab_);
     procDia_ = std::make_shared<Process_Dialog>(this);
+    Fl::add_timeout(0.0, timer_callback, this);
 }
 
 void Main_Window::load(const DWORD& procId) {
@@ -206,70 +207,68 @@ void Main_Window::load(const DWORD& procId) {
         process_handle = procHan;
         procHanExit_ = procHanExit;
         dsex_header_address = dsexHeadAdr;
-        Fl::add_timeout(0.0, update, this);
+        update();
     } else fl_alert("プロセスメモリ内にダビスタEXが見つかりません。");
 }
 
-void Main_Window::update(void* some) {
-    static char label[256];
+void Main_Window::timer_callback(void* some) {
     Main_Window* win = (Main_Window*)(some);
-    Racing_Horse_Table* tab = win->racHorTab_.get();
-    Process_Dialog* dia = win->procDia_.get();
-    if (!dia->visible()) {
-        try {
-            win->farm = read_farm
-                (win->process_handle, win->dsex_header_address);
-            const auto& farm = win->farm;
-            if (std::string(farm.magic, farm.magic + 4) != "DSEX")
-                throw std::runtime_error(Sprintf("farm not found."));
-            std::string nam;
-            if (*farm.name) nam = ansi_to_utf8(std::string(
-                farm.name, farm.name + 8)) + "牧場";
-            else nam = "牧場なし";
-            std::sprintf(label, "%s(%s)", APP_NAME.c_str(), nam.c_str());
-            win->label(label);
+    if (win->process_handle) win->update();
+    Fl::repeat_timeout(1.0, timer_callback, win);
+}
 
-            tab->records.clear();
-            for (unsigned i = 0; i < 35; ++i) {
-                if (farm.racing[i] >= 0) {
-                    const racing_horse hor = read_racing_horse(
-                        win->process_handle,
-                        win->dsex_header_address,
-                        farm.racing[i]
+void Main_Window::update() {
+    static char lab[256];
+    Racing_Horse_Table* tab = racHorTab_.get();
+    Process_Dialog* dia = procDia_.get();
+    try {
+        farm = read_farm(process_handle, dsex_header_address);
+        if (std::string(farm.magic, farm.magic + 4) != "DSEX")
+            throw std::runtime_error(Sprintf("farm not found."));
+        std::string nam;
+        if (*farm.name) nam = ansi_to_utf8(std::string(
+            farm.name, farm.name + 8)) + "牧場";
+        else nam = "牧場なし";
+        std::sprintf(lab, "%s(%s)", APP_NAME.c_str(), nam.c_str());
+        label(lab);
+        tab->records.clear();
+        for (unsigned i = 0; i < 35; ++i) {
+            if (farm.racing[i] >= 0) {
+                const racing_horse hor = read_racing_horse(
+                    process_handle,
+                    dsex_header_address,
+                    farm.racing[i]
+                );
+                if (hor.name) {
+                    tab->records.push_back(
+                        racing_horse_record{
+                            i,
+                            hor,
+                            read_user_horse_name(
+                                process_handle,
+                                dsex_header_address,
+                                hor.name
+                            ), read_stallion(
+                                process_handle,
+                                dsex_header_address,
+                                hor.father
+                            )
+                        }
                     );
-                    if (hor.name) {
-                        tab->records.push_back(
-                            racing_horse_record{
-                                i,
-                                hor,
-                                read_user_horse_name(
-                                    win->process_handle,
-                                    win->dsex_header_address,
-                                    hor.name
-                                ), read_stallion(
-                                    win->process_handle,
-                                    win->dsex_header_address,
-                                    hor.father
-                                )
-                            }
-                        );
-                    }
                 }
             }
-            tab->sort();
-            tab->rows(tab->records.size());
-            tab->redraw();
-
-            Fl::repeat_timeout(1.0, update, win);
-        } catch (const std::runtime_error& err) {
-            //fl_alert("予期せぬエラーが発生しました。\n%s", err.what());
-            fl_alert(
-                "データの読込みに失敗しました。\n"
-                "モニタリングを中断します。");
-            win->label(APP_NAME.c_str());
-            tab->records.clear();
-            tab->rows(0);
         }
+        tab->sort();
+        tab->rows(tab->records.size());
+        tab->redraw();
+    } catch (const std::runtime_error& err) {
+        fl_alert(
+            "データの読込みに失敗しました。\n"
+            "モニタリングを中断します。");
+        process_handle = NULL;
+        label(APP_NAME.c_str());
+        tab->records.clear();
+        tab->rows(0);
     }
 }
 
@@ -309,7 +308,7 @@ Racing_Horse_Table::Racing_Horse_Table(
     end();
 }
 
-Sortable_Table<racing_horse_record>::compare_t
+const Sortable_Table<racing_horse_record>::compare_t
     Racing_Horse_Table::comps_[19] =
 {
     [] (racing_horse_record* lhs, racing_horse_record* rhs) -> bool
@@ -356,17 +355,14 @@ Process_Dialog::Process_Dialog(Main_Window* mainWin) :
     Fl_Window(210, 242, PROCESS_DIALOG_LABEL.c_str()), mainWin_(mainWin)
 {
     procTab_ = std::make_shared<Process_Table>(0, 0, 210, 222);
-
     okBut_ = std::make_shared<Fl_Return_Button>(0, 222, 105, 20, "OK");
     okBut_->labelfont(FL_COURIER);
     okBut_->labelsize(11);
     okBut_->callback(okBut_callback, this);
-
     canBut_ = std::make_shared<Fl_Button>(105, 222, 110, 20, "キャンセル");
     canBut_->labelfont(FL_COURIER);
     canBut_->labelsize(11);
     canBut_->callback(canBut_callback, this);
-
     end();
     resizable(*procTab_);
     set_modal();
@@ -433,7 +429,9 @@ Process_Table::Process_Table
     end();
 }
 
-Sortable_Table<PROCESSENTRY32>::compare_t Process_Table::comps_[2] = {
+const Sortable_Table<PROCESSENTRY32>::compare_t
+    Process_Table::comps_[2] =
+{
     [] (PROCESSENTRY32* lhs, PROCESSENTRY32* rhs) -> bool
     {return std::string(lhs->szExeFile) < std::string(rhs->szExeFile);},
     [] (PROCESSENTRY32* lhs, PROCESSENTRY32* rhs) -> bool
@@ -452,7 +450,7 @@ std::string Sprintf(const char* format, ...) {
     va_start(args, format);
     vsprintf(buf, format, args);
     va_end(args);
-    return std::string(buf);
+    return buf;
 }
 
 std::string ansi_to_utf8(const std::string& ansi) {
