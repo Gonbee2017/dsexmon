@@ -6,7 +6,7 @@ dsexmon.exeを起動します。
 ![](img/README_dsexmon_startup.png)  
 "ダビスタEXを実行しているプロセスを開く"ボタンを押します。  
 
-実行しているプロセスの一覧が表示されます。  
+実行中のプロセスの一覧が表示されます。  
 ![](img/README_dsexmon_process.png)  
 エミュレータのプロセスを選び、"OK"ボタンを押します。  
 

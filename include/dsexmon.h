@@ -133,6 +133,7 @@ public:
     farm_t farm;
     Main_Window();
     void load(const DWORD& procId);
+    static void timer_callback(void* some);
 private:
     std::shared_ptr<Fl_Button> procBut_;
     std::shared_ptr<Racing_Horse_Table> racHorTab_;
@@ -140,7 +141,6 @@ private:
     std::shared_ptr<scope_exit> procHanExit_;
     static void procBut_callback(Fl_Widget* wid, void* some);
     static void racHorTab_callback(Fl_Widget* wid, void* some);
-    static void timer_callback(void* some);
     void update();
 };
 

@@ -262,13 +262,12 @@ void Main_Window::update() {
         tab->rows(tab->records.size());
         tab->redraw();
     } catch (const std::runtime_error& err) {
-        fl_alert(
-            "データの読込みに失敗しました。\n"
-            "モニタリングを中断します。");
         process_handle = NULL;
         label(APP_NAME.c_str());
         tab->records.clear();
         tab->rows(0);
+        fl_alert
+            ("データの読込みに失敗しました。\nモニタリングを中断します。");
     }
 }
 
